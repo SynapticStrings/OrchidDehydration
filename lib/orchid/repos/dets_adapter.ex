@@ -1,0 +1,3 @@
+defmodule Orchid.Repos.DetsAdapter do
+  # ...
+end
