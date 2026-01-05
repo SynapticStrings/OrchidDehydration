@@ -62,11 +62,6 @@ defmodule Orchid.Dehydration.Hook do
 
   # ==== Dehydrate ====
 
-  defguard is_big(payload, binary_size, enumerable_size)
-           when (is_binary(payload) and byte_size(payload) >= binary_size) or
-                  (is_list(payload) and length(payload) >= enumerable_size) or
-                  (is_map(payload) and map_size(payload) >= enumerable_size)
-
   defp dehydrate_params(outputs, repo, threshold, opts) do
     Enum.reduce_while(outputs, [], fn param, acc ->
       case dehydrate_payload(param, repo, threshold, opts) do
@@ -81,19 +76,35 @@ defmodule Orchid.Dehydration.Hook do
     end
   end
 
-  defp dehydrate_payload(%Param{payload: raw_data} = param, repo, threshold, opts)
-       when is_big(raw_data, threshold, div(threshold, 8)) do
-    case repo.put(raw_data, opts) do
-      {:ok, result} ->
-        ref_payload = {:ref, repo, result}
-        {:ok, Param.set_payload(param, ref_payload)}
+  defp dehydrate_payload(%Param{payload: raw_data} = param, repo, threshold, opts) do
+    if should_dehydrate?(raw_data, threshold) do
+      case repo.put(raw_data, opts) do
+        {:ok, result} ->
+          ref_payload = {:ref, repo, result}
+          {:ok, Param.set_payload(param, ref_payload)}
 
-      {:error, reason} ->
-        {:error, {:dehydrate_failed, param.name, reason}}
+        {:error, reason} ->
+          {:error, {:dehydrate_failed, param.name, reason}}
+      end
+    else
+      {:ok, param}
     end
   end
 
-  defp dehydrate_payload(param, _repo, _threshold, _opts), do: {:ok, param}
+  # Adapt Nx
+  defp should_dehydrate?(%{shape: shape, type: {_type, bits_per_element}}, threshold)
+       when is_tuple(shape) and is_number(bits_per_element),
+       do: (Tuple.product(shape) * (bits_per_element / 8)) > threshold
+
+  defp should_dehydrate?(data, threshold) when is_binary(data), do: byte_size(data) > threshold
+  defp should_dehydrate?(data, threshold) when is_list(data), do: length(data) > div(threshold, 8)
+
+  defp should_dehydrate?(data, threshold) when is_map(data),
+    do: map_size(data) > div(threshold, 8)
+
+  defp should_dehydrate?(_data, _threshold), do: false
+
+  # ==== Option Fetch ====
 
   defp get_repo_and_opts(ctx) do
     WorkflowCtx.get_baggage(
