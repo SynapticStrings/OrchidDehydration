@@ -28,7 +28,7 @@ defmodule Orchid.Dehydration.Hook do
 
       raw_output
       |> List.wrap()
-      |> dehydrate_payloads(repo, get_threshold(ctx), opts)
+      |> dehydrate_params(repo, get_threshold(ctx), opts)
     else
       error_or_special -> error_or_special
     end
@@ -67,7 +67,7 @@ defmodule Orchid.Dehydration.Hook do
                   (is_list(payload) and length(payload) >= enumerable_size) or
                   (is_map(payload) and map_size(payload) >= enumerable_size)
 
-  defp dehydrate_payloads(outputs, repo, threshold, opts) do
+  defp dehydrate_params(outputs, repo, threshold, opts) do
     Enum.reduce_while(outputs, [], fn param, acc ->
       case dehydrate_payload(param, repo, threshold, opts) do
         {:ok, p} -> {:cont, [p | acc]}
