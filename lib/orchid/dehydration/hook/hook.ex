@@ -1,4 +1,4 @@
-defmodule Orchid.Dehydration.Hook do
+defmodule Orchid.Dehydration.Hook.Param do
   @moduledoc """
   Runner Hook that handles transparent data offloading (Dehydration) and reloading (Hydration).
 

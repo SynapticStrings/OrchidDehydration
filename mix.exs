@@ -19,7 +19,8 @@ defmodule OrchidDehydration.MixProject do
 
   defp deps do
     [
-      {:orchid, "~> 0.5.1"}
+      {:orchid, "~> 0.5.1"},
+      # {:orchid_symbiont, "~> 0.1", optional: true}
     ]
   end
 end
