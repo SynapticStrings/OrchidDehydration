@@ -9,8 +9,23 @@
 ```elixir
 def deps do
   [
-    {:orchid_dehydration, "~> 0.1.0"}
+    {
+      :orchid_dehydration,
+      git: "https://github.com/SynapticStrings/OrchidDehydration.git"
+    }
   ]
 end
 ```
 
+## Roadmap
+
+- [ ] Param hydration/dehydration
+  - [x] Implement Hook
+  - [ ] Implement Repos
+    - `:ets`
+    - `:dets`
+    - (Required discuss) remote(Node/HTTP)
+- [ ] Recipe hydration/dehydration
+  - [ ] pure recipe
+  - [ ] with [OrchidSymbiont](https://github.com/SynapticStrings/OrchidSymbiont)
+- [ ] Save & Resume
