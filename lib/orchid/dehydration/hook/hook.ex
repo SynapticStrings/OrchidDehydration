@@ -98,8 +98,8 @@ defmodule Orchid.Dehydration.Hook.Param do
 
   defp should_dehydrate?(data, threshold) when is_binary(data), do: byte_size(data) > threshold
   defp should_dehydrate?(data, threshold) when is_list(data), do: length(data) > div(threshold, 8)
-
-  defp should_dehydrate?(data, threshold), do: :erlang.external_size(data) > 2 * threshold
+  defp should_dehydrate?(data, threshold) when is_map(data), do: map_size(data) > div(threshold, 16)
+  defp should_dehydrate?(data, threshold), do: :erlang.external_size(data) >= 2 * threshold
 
   # ==== Option Fetch ====
 
